@@ -6,7 +6,7 @@ import Reader from './components/Reader.jsx';
 import Quotes from './components/Quotes.jsx';
 import Glossary from './components/Glossary.jsx';
 import pageText from './text.js';
-import Popover from 'react-text-selection-popover';
+import axios from 'axios';
 
 
 class App extends React.Component {
@@ -15,6 +15,8 @@ class App extends React.Component {
     this.state = {
       view: 'reader',
       text:[],
+      quotes:[],
+      glossary:[],
       selectedText:''
     }
     this.generateLines = this.generateLines.bind(this);
@@ -23,6 +25,8 @@ class App extends React.Component {
     this.getText = this.getText.bind(this);
     this.addToGlossary = this.addToGlossary.bind(this);
     this.addToQuotes = this.addToQuotes.bind(this);
+    this.getQuotes = this.getQuotes.bind(this);
+    this.getGlossary = this.getGlossary.bind(this);
   }
 
   componentDidMount() {
@@ -41,6 +45,10 @@ class App extends React.Component {
     this.setState({
       text: lineArr
     })
+
+    this.getGlossary();
+    this.getQuotes();
+
   }
 
   generateLines() {
@@ -60,12 +68,106 @@ class App extends React.Component {
     }
   }
 
-  addToQuotes(){
+  getQuotes() {
+    axios({
+      method: 'get',
+      url: '/quotes',
+    })
+    .then((quotes) => {
+      this.setState({
+        quotes: quotes.data
+      })
+    })
+    .catch((error) => {
+      if(error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        console.log (error.request)
+      } else {
+        console.log ('Error', error.message);
+      }
+    })
+  }
 
+  getGlossary() {
+    console.log('gloss')
+    axios({
+      method: 'get',
+      url: '/glossary',
+    })
+    .then((glossary) => {
+      this.setState({
+        glossary: glossary.data
+      })
+    })
+    .catch((error) => {
+      if(error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        console.log (error.request)
+      } else {
+        console.log ('Error', error.message);
+      }
+    })
+  }
+
+  addToQuotes(){
+    axios({
+      method: 'post',
+      url: '/quotes',
+      data: {
+        quote: this.state.selectedText
+      }
+    })
+    .catch((error) => {
+      if(error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        console.log (error.request)
+      } else {
+        console.log ('Error', error.message);
+      }
+    })
+
+    this.getQuotes();
   }
 
   addToGlossary(){
+    let word = this.state.selectedText;
+    axios({
+      method:'get',
+      url: `https://dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=2e76cb1e-565d-4b6e-842d-9026ad41a058`
+    })
+    .then ((definition) => {
+      let def = definition.data[0]['shortdef'];
+      axios({
+        method: 'post',
+        url: '/glossary',
+        data: {
+          word: word,
+          definition: def
+        }
+      })
+    })
+    .catch((error) => {
+      if(error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        console.log (error.request)
+      } else {
+        console.log ('Error', error.message);
+      }
+    })
 
+    this.getGlossary();
   }
 
   changeView(option) {
@@ -78,15 +180,23 @@ class App extends React.Component {
     const {view} = this.state;
 
     if (view === 'reader') {
-      return <Reader text={this.state.text} getText={this.getText} addToGlossary={this.addToGlossary} addToQuotes={this.addToQuotes}/>
+      return (
+        <React.Fragment>
+          <Reader text={this.state.text} getText={this.getText} addToGlossary={this.addToGlossary} addToQuotes={this.addToQuotes}/>
+          <div className="side">
+            <h3>Chapters</h3>
+            {/* Possibly chapter pagination? flex container down*/}
+          </div>
+        </React.Fragment>
+      )
     }
 
     if (view === 'quotes') {
-      return <Quotes />
+      return <Quotes quotes={this.state.quotes}/>
     }
 
     if (view === 'glossary') {
-      return <Glossary />
+      return <Glossary glossary={this.state.glossary}/>
     }
   }
 
@@ -104,11 +214,6 @@ class App extends React.Component {
       {/* The flexible grid (content) */}
       <div className="row">
         {this.renderView()}
-
-        <div className="side">
-          <h3>Chapters</h3>
-          {/* Possibly chapter pagination? flex container down*/}
-        </div>
 
       </div>
 

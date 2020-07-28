@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/test');
+mongoose.connect('mongodb://localhost/inspiread');
 
 var db = mongoose.connection;
 
@@ -11,21 +11,33 @@ db.once('open', function() {
   console.log('mongoose connected successfully');
 });
 
-var itemSchema = mongoose.Schema({
-  quantity: Number,
-  description: String
+var glossarySchema = new mongoose.Schema({
+  word: String,
+  definition: Array
 });
 
-var Item = mongoose.model('Item', itemSchema);
+var quotesSchema = new mongoose.Schema({
+  quote: String
+});
 
-var selectAll = function(callback) {
-  Item.find({}, function(err, items) {
-    if(err) {
-      callback(err, null);
-    } else {
-      callback(null, items);
-    }
-  });
-};
+var Glossary = mongoose.model('Glossary', glossarySchema);
 
-module.exports.selectAll = selectAll;
+var Quotes = mongoose.model('Quotes', quotesSchema);
+
+module.exports = {
+  getGlossary: function (callback) {
+    Glossary.find({}, callback)
+  },
+
+  addGlossary: function (word, def, callback){
+    Glossary.create({word: word, definition: def}, callback)
+  },
+
+  getQuotes: function (callback) {
+    Quotes.find({}, callback)
+  },
+
+  addQuotes: function (quote, callback){
+    Quotes.create({quote: quote}, callback)
+  }
+}

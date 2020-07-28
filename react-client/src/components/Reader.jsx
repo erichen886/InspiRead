@@ -10,7 +10,7 @@ const Reader = (props) => {
       {props.text.map((line, index) => {
         let words = line.trim().split(' ');
         return (
-          <div key={index} className={index}>
+          <div key={index} className={`${index} line`}>
             {words.map((word, rIndex) => {
               return(
                 <span key={`${index}-${rIndex}`} className={`${index}-${rIndex}`}>
