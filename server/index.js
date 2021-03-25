@@ -4,6 +4,7 @@ const items = require('../database-mongo');
 const controllers = require('./controllers')
 
 const app = express();
+
 app.use(bodyParser.urlencoded({ extended: false}))
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/../react-client/dist'));
@@ -14,7 +15,8 @@ app.post('/glossary', controllers.addGlossary);
 app.get('/quotes', controllers.getQuotes);
 app.post('/quotes', controllers.addQuotes);
 
-app.listen(3000, function() {
-  console.log('listening on port 3000!');
+app.listen(process.env.PORT, function() {
+  console.log(process.env.MERRIAM_API_KEY, process.env.PORT)
+  console.log(`listening on port ${process.env.PORT}`);
 });
 

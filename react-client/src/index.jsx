@@ -8,7 +8,6 @@ import Glossary from './components/Glossary.jsx';
 import pageText from './text.js';
 import axios from 'axios';
 
-
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -142,7 +141,7 @@ class App extends React.Component {
     let word = this.state.selectedText;
     axios({
       method:'get',
-      url: `https://dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=`
+      url: `https://dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=${process.env.MERRIAM_API_KEY}`
     })
     .then ((definition) => {
       let def = definition.data[0]['shortdef'];
